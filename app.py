@@ -100,15 +100,17 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Load Lottie animation
-def load_lottie_url(url):
-    r = requests.get(url)
-    if r.status_code != 200:
-        return None
-    return r.json()
+# Load Lottie animation from local file
+def load_lottie_file(file_path):
+    with open(file_path, "r") as f:
+        return json.load(f)
 
-# COVID-19 related Lottie animation
-lottie_covid = load_lottie_url("https://assets5.lottiefiles.com/packages/lf20_5tl1xxnz.json")
+# Load local COVID-19 related Lottie animation
+try:
+    lottie_covid = load_lottie_file("sidebar_animation.json")
+except Exception as e:
+    st.error(f"Error loading animation file: {e}")
+    lottie_covid = None
 
 @st.cache_data
 def load_data():
@@ -190,14 +192,8 @@ def main():
     # Load data
     df = load_data()
     
-    # Sidebar navigation with Lottie animation
+    # Sidebar navigation
     st.sidebar.markdown("## Navigation")
-    
-    # Add Lottie animation to sidebar
-    if lottie_covid:
-        st.sidebar.markdown('<div class="lottie-container">', unsafe_allow_html=True)
-        st_lottie(lottie_covid, height=200, key="covid_animation")
-        st.sidebar.markdown('</div>', unsafe_allow_html=True)
     
     # Create a more visually appealing navigation
     nav_options = ["Global Overview", "Country Analysis", "Epidemiological Analysis"]
@@ -211,6 +207,11 @@ def main():
         if st.sidebar.button(option, key=f"nav_{option}", use_container_width=True):
             st.session_state.active_page = option
     
+    # Add separator and Lottie animation in sidebar
+
+    with st.sidebar:
+        st_lottie(lottie_covid, height=200, key="covid_animation", quality="high")
+
     # Highlight the active page
     st.sidebar.markdown(f"""
         <style>
