@@ -5,11 +5,14 @@ import plotly.graph_objects as go
 from datetime import datetime
 import numpy as np
 import statsmodels.api as sm
+import json
+import requests
+from streamlit_lottie import st_lottie
 
 # Page configuration
 st.set_page_config(
     page_title="COVID-19 Data Analysis Dashboard",
-    page_icon="��",
+    page_icon="🦠",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -89,8 +92,23 @@ st.markdown("""
         background-color: #f8f9fa;
         margin-top: 1rem;
     }
+    .lottie-container {
+        display: flex;
+        justify-content: center;
+        margin: 1rem 0;
+    }
     </style>
 """, unsafe_allow_html=True)
+
+# Load Lottie animation
+def load_lottie_url(url):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+
+# COVID-19 related Lottie animation
+lottie_covid = load_lottie_url("https://assets5.lottiefiles.com/packages/lf20_5tl1xxnz.json")
 
 @st.cache_data
 def load_data():
@@ -172,8 +190,14 @@ def main():
     # Load data
     df = load_data()
     
-    # Sidebar navigation
+    # Sidebar navigation with Lottie animation
     st.sidebar.markdown("## Navigation")
+    
+    # Add Lottie animation to sidebar
+    if lottie_covid:
+        st.sidebar.markdown('<div class="lottie-container">', unsafe_allow_html=True)
+        st_lottie(lottie_covid, height=200, key="covid_animation")
+        st.sidebar.markdown('</div>', unsafe_allow_html=True)
     
     # Create a more visually appealing navigation
     nav_options = ["Global Overview", "Country Analysis", "Epidemiological Analysis"]
